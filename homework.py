@@ -33,26 +33,45 @@ hw_headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 
+class StatusNotFoundError(Exception):
+    pass
+
+
 def parse_homework_status(homework):
     """Returns results of a homework review."""
-    homework_name = homework.get('homework_name')
-    homework_status = homework.get('status')
-    if homework_status == 'rejected':
-        verdict = 'К сожалению, в работе нашлись ошибки.'
-    elif homework_status == 'approved':
-        verdict = 'Ревьюеру всё понравилось, работа зачтена!'
-    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+    try:
+        homework_name = homework['homework_name']
+        homework_status = homework['status']
+    except KeyError as error:
+        logger.error(f'Ошибка: {error}', exc_info=True)
+        raise
+    else:
+        acceptable_statuses = ['reviewing', 'rejected', 'approved']
+        if homework_status == 'rejected':
+            verdict = 'К сожалению, в работе нашлись ошибки.'
+        elif homework_status == 'approved':
+            verdict = 'Ревьюеру всё понравилось, работа зачтена!'
+        elif homework_status not in acceptable_statuses:
+            raise StatusNotFoundError(
+                'Статус проверки работы обновлён, но не опознан.'
+            )
+        return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homeworks(current_timestamp):
     """Returns results of the request to the API."""
     hw_payload = {'from_date': current_timestamp}
-    homework_statuses = requests.get(
-        hw_url,
-        headers=hw_headers,
-        params=hw_payload
-    )
-    return homework_statuses.json()
+    try:
+        homework_statuses = requests.get(
+            hw_url,
+            headers=hw_headers,
+            params=hw_payload
+        )
+    except Exception as error:
+        logger.error(f'Ошибка доступа к API: {error}', exc_info=True)
+        raise
+    else:
+        return homework_statuses.json()
 
 
 def send_message(message):
@@ -65,7 +84,7 @@ def send_message(message):
 
 def main():
     """Executable code."""
-    current_timestamp = int(time.time())
+    current_timestamp = int(time.time()) - 3 * 60 * 60
 
     while True:
         try:
@@ -79,7 +98,6 @@ def main():
             current_timestamp = int(time.time())
 
         except Exception as e:
-            print(f'Бот упал с ошибкой: {e}')
             logger.error(f'Бот упал с ошибкой: {e}', exc_info=True)
             send_message(f'Бот упал с ошибкой: {e}')
             time.sleep(5)
