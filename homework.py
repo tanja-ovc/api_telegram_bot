@@ -44,17 +44,18 @@ def parse_homework_status(homework):
         homework_status = homework['status']
     except KeyError as error:
         logger.error(f'Ошибка: {error}', exc_info=True)
-        raise
+        raise error
     else:
         acceptable_statuses = ['reviewing', 'rejected', 'approved']
+        if homework_status not in acceptable_statuses:
+            raise StatusNotFoundError(
+                'Статус проверки работы обновлён, но не опознан.'
+            )
         if homework_status == 'rejected':
             verdict = 'К сожалению, в работе нашлись ошибки.'
         elif homework_status == 'approved':
             verdict = 'Ревьюеру всё понравилось, работа зачтена!'
-        elif homework_status not in acceptable_statuses:
-            raise StatusNotFoundError(
-                'Статус проверки работы обновлён, но не опознан.'
-            )
+
         return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
@@ -69,7 +70,7 @@ def get_homeworks(current_timestamp):
         )
     except Exception as error:
         logger.error(f'Ошибка доступа к API: {error}', exc_info=True)
-        raise
+        raise error
     else:
         return homework_statuses.json()
 
@@ -84,7 +85,7 @@ def send_message(message):
 
 def main():
     """Executable code."""
-    current_timestamp = int(time.time()) - 3 * 60 * 60
+    current_timestamp = int(time.time())
 
     while True:
         try:
