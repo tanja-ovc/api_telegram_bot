@@ -85,7 +85,7 @@ def send_message(message):
 
 def main():
     """Executable code."""
-    current_timestamp = int(time.time()) - 3 * 60 * 60
+    current_timestamp = int(time.time())
 
     while True:
         try:
@@ -95,8 +95,8 @@ def main():
                 homework = homeworks_list[0]
                 message = parse_homework_status(homework)
                 send_message(message)
-            time.sleep(5 * 60)
-            current_timestamp = int(time.time()) - 3 * 60 * 60
+            time.sleep(2)
+            current_timestamp = int(time.time())
 
         except Exception as e:
             logger.error(f'Бот упал с ошибкой: {e}', exc_info=True)
