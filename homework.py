@@ -95,7 +95,7 @@ def main():
                 homework = homeworks_list[0]
                 message = parse_homework_status(homework)
                 send_message(message)
-            time.sleep(2)
+            time.sleep(5 * 60)
             current_timestamp = homework_statuses_json.get('current_date')
 
         except Exception as e:
