@@ -96,7 +96,7 @@ def main():
                 message = parse_homework_status(homework)
                 send_message(message)
             time.sleep(2)
-            current_timestamp = int(time.time())
+            current_timestamp = homework_statuses_json.get('current_date')
 
         except Exception as e:
             logger.error(f'Бот упал с ошибкой: {e}', exc_info=True)
