@@ -51,12 +51,15 @@ def parse_homework_status(homework):
             raise StatusNotFoundError(
                 'Статус проверки работы обновлён, но не опознан.'
             )
+        if homework_status == 'reviewing':
+            verdict = f'Работа "{homework_name}" принята на ревью.'
         if homework_status == 'rejected':
-            verdict = 'К сожалению, в работе нашлись ошибки.'
+            verdict = (
+                f'Ревью пройдено: в работе "{homework_name}" нашлись ошибки.'
+            )
         elif homework_status == 'approved':
-            verdict = 'Ревьюеру всё понравилось, работа зачтена!'
-
-        return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+            verdict = f'Работа "{homework_name}" зачтена! :)'
+        return f'{verdict}'
 
 
 def get_homeworks(current_timestamp):
