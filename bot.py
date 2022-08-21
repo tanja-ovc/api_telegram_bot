@@ -87,6 +87,7 @@ def send_message(message):
 
 
 def main():
+
     """Executable code."""
     current_timestamp = int(time.time())
 
